@@ -1,0 +1,6 @@
+{
+  "name": "Duda Mello Boutique — BioSite & Catálogo Studio",
+  "description": "Vitrine comercial mobile-first de alta conversão com mini-catálogo interativo, sacola integrada ao WhatsApp e gerador de template HTML5 único.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
