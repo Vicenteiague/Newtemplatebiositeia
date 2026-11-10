@@ -62,6 +62,13 @@ export interface StoreConfig {
   products: ProductItem[];
 }
 
+export interface SavedStoreEntry {
+  id: string;
+  label: string;
+  domainRef: string;
+  config: StoreConfig;
+}
+
 export const DUDA_MELLO_CONFIG: StoreConfig = {
   storeName: 'Duda Mello Boutique',
   slogan: 'Moda com estilo para brilhar em qualquer dia.',
@@ -70,7 +77,7 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
   cityState: 'Itatinga/SP',
   marqueePhrase1: 'NOVIDADES TODA SEMANA',
   marqueePhrase2: 'ESQUENTA BLACK',
-  whatsappNumber: '5514997983701',
+  whatsappNumber: '5567993174612',
   whatsappHeroText: 'Olá! Quero ver as peças da loja.',
   whatsappSubtitle: 'Tire dúvidas e peça sua peça',
   catalogSubtitle: 'Bolsas, roupas, calçados e perfumes',
@@ -123,8 +130,8 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
   ],
   address: 'R. Padre Chirinéa, 548 - Loja 1 - Centro, Itatinga/SP',
   mapsUrl: 'https://maps.google.com/?cid=4420288341442145183',
-  phoneDisplay: '(14) 99798-3701',
-  phoneTel: '+5514997983701',
+  phoneDisplay: '+55 (67) 99317-4612',
+  phoneTel: '+5567993174612',
   paymentMethods: ['Pix', 'Crédito', 'Débito', 'Dinheiro'],
   maxInstallments: 10,
   openingHours: 'Seg a sáb: 8h às 18h · Dom: fechado',
@@ -213,3 +220,235 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
     },
   ],
 };
+
+export const ENERGY_STOR3_CONFIG: StoreConfig = {
+  storeName: 'Energy Stor3',
+  slogan:
+    'Eletrônicos, acessórios e assistência técnica. Quase 10 anos de mercado.',
+  logoUrl: '/src/assets/images/energy_store_logo_1794316756322.jpg',
+  specialties: ['Celulares', 'Acessórios', 'Assistência técnica', 'Atacado'],
+  cityState: 'São Paulo/SP',
+  marqueePhrase1: 'CELULARES · ACESSÓRIOS · GAMES',
+  marqueePhrase2: 'ASSISTÊNCIA TÉCNICA ESPECIALIZADA',
+  whatsappNumber: '5567993174612',
+  whatsappHeroText: 'Olá! Vim pelo site da Energy Stor3 e quero atendimento.',
+  whatsappSubtitle: 'Atendimento rápido · varejo e atacado',
+  catalogSubtitle: 'Celulares, fones, capinhas e assistência técnica',
+  instagramHandle: '@energystor3',
+  instagramUrl: 'https://instagram.com/energystor3',
+  wifiSsid: 'Energy Stor3 Clientes',
+  wifiPassword: '',
+  wifiEncryption: 'nopass',
+  offerBadge: 'Oferta',
+  offerStockLabel: 'Desconto especial -15%',
+  offerTitle: 'JBL Tune Flex 2 + Película 3D',
+  offerDescription: 'Fone Bluetooth até 48h de bateria com condição exclusiva',
+  offerPriceHighlight: 'R$ 599,00',
+  offerWhatsappText:
+    'Olá! Vim pelo site da Energy Stor3 e quero garantir a oferta do JBL Tune Flex 2!',
+  offerDurationHours: 48,
+  googleRating: '4,8',
+  googleReviewUrl: 'https://maps.google.com/?cid=11105222543249429476',
+  aboutText:
+    'A Energy Stor3 está há quase 10 anos no Bom Retiro, em São Paulo, com celulares, eletrônicos, acessórios e assistência técnica especializada. São 3 lojas: Loja 01 na Rua José Paulino, 30, Loja 02 na Rua da Graça, 275, e Loja 03 na Rua Três Rios, 208. Atendemos varejo, atacado e empresas. Chame no WhatsApp para ver produtos, preços e orçamentos de conserto.',
+  serviceTags: [
+    'Celulares',
+    'Capinhas',
+    'Películas',
+    'Fones',
+    'Smartwatch',
+    'Carregadores',
+    'PC Gamer',
+    'Games',
+    'Notebook',
+    'MacBook',
+    'Assistência técnica',
+  ],
+  faqs: [
+    {
+      question: 'Onde ficam as lojas?',
+      answer:
+        'No Bom Retiro, em São Paulo. Loja 01: Rua José Paulino, 30. Loja 02: Rua da Graça, 275. Loja 03: Rua Três Rios, 208.',
+    },
+    {
+      question: 'Vocês vendem no atacado?',
+      answer:
+        'Sim. Atendemos varejo, atacado e empresas. Chame no WhatsApp para condições de atacado e corporativo.',
+    },
+    {
+      question: 'Fazem conserto de celular?',
+      answer:
+        'Sim. Temos assistência técnica especializada em celulares, notebooks e games. Peça seu orçamento pelo WhatsApp.',
+    },
+    {
+      question: 'Como vejo os preços e faço meu pedido?',
+      answer:
+        'Toque em Adicionar nos produtos desejados e clique em Enviar no WhatsApp. O WhatsApp abre com sua lista pronta e respondemos rápido.',
+    },
+  ],
+  address:
+    'Loja 01: Rua José Paulino, 30 · Loja 02: Rua da Graça, 275 · Loja 03: Rua Três Rios, 208 - Bom Retiro · São Paulo/SP',
+  mapsUrl: 'https://maps.google.com/?cid=11105222543249429476',
+  phoneDisplay: '+55 (67) 99317-4612',
+  phoneTel: '+5567993174612',
+  paymentMethods: ['Pix', 'Crédito', 'Débito', 'Dinheiro', 'Transf.'],
+  maxInstallments: 12,
+  openingHours: 'Seg a sáb: 8h às 18h · Bom Retiro, São Paulo/SP',
+  agencyCreditName: 'Jonathan da Nour Sistemas',
+  agencyCreditUrl: '#codigo-html',
+  categories: [
+    {
+      id: 'todos',
+      name: 'Tudo',
+      img: '/src/assets/images/energy_store_logo_1794316756322.jpg',
+    },
+    {
+      id: 'celulares',
+      name: 'Celulares',
+      img: '/src/assets/images/energy_smartphones_pro_1794316755805.jpg',
+    },
+    {
+      id: 'fones',
+      name: 'Fones de ouvido',
+      img: '/src/assets/images/energy_wireless_earbuds_1794316757804.jpg',
+    },
+    {
+      id: 'capinhas',
+      name: 'Capinhas',
+      img: '/src/assets/images/energy_magsafe_cases_1794316758693.jpg',
+    },
+    {
+      id: 'assistencia',
+      name: 'Assistência técnica',
+      img: '/src/assets/images/energy_tech_repair_1794316759661.jpg',
+    },
+  ],
+  products: [
+    {
+      id: 101,
+      name: 'iPhone 17 Pro Max 256 GB',
+      desc: 'Lacrado, 1 ano de garantia Apple · Lançamento.',
+      price: 11499.0,
+      installments: 12,
+      category: 'celulares',
+      img: '/src/assets/images/energy_smartphones_pro_1794316755805.jpg',
+      featured: true,
+    },
+    {
+      id: 102,
+      name: 'Samsung Galaxy S25 Ultra 256 GB',
+      desc: 'Câmera de 200 MP e S Pen integrada · Mais vendido.',
+      price: 7999.0,
+      installments: 12,
+      category: 'celulares',
+      img: '/src/assets/images/energy_smartphones_pro_1794316755805.jpg',
+      featured: true,
+    },
+    {
+      id: 103,
+      name: 'Xiaomi Redmi Note 14 Pro 256 GB',
+      desc: '8 GB de RAM, tela AMOLED 120 Hz.',
+      price: 2199.0,
+      installments: 12,
+      category: 'celulares',
+      img: '/src/assets/images/energy_smartphones_pro_1794316755805.jpg',
+    },
+    {
+      id: 104,
+      name: 'AirPods Pro 3',
+      desc: 'Cancelamento de ruído ativo · Novo.',
+      price: 2499.0,
+      installments: 12,
+      category: 'fones',
+      img: '/src/assets/images/energy_wireless_earbuds_1794316757804.jpg',
+      featured: true,
+    },
+    {
+      id: 105,
+      name: 'Galaxy Buds3 Pro',
+      desc: 'Som Hi-Fi e cancelamento de ruído inteligente.',
+      price: 1499.0,
+      installments: 12,
+      category: 'fones',
+      img: '/src/assets/images/energy_wireless_earbuds_1794316757804.jpg',
+    },
+    {
+      id: 106,
+      name: 'JBL Tune Flex 2',
+      desc: 'Bluetooth, até 48 h de bateria (-15% OFF).',
+      price: 599.0,
+      installments: 12,
+      category: 'fones',
+      img: '/src/assets/images/energy_wireless_earbuds_1794316757804.jpg',
+    },
+    {
+      id: 107,
+      name: 'Capinha MagSafe transparente',
+      desc: 'Para iPhone, proteção premium que não amarela.',
+      price: 89.9,
+      installments: 12,
+      category: 'capinhas',
+      img: '/src/assets/images/energy_magsafe_cases_1794316758693.jpg',
+    },
+    {
+      id: 108,
+      name: 'Capinha anti-impacto',
+      desc: 'Para Samsung, bordas reforçadas de alta absorção.',
+      price: 59.9,
+      installments: 12,
+      category: 'capinhas',
+      img: '/src/assets/images/energy_magsafe_cases_1794316758693.jpg',
+    },
+    {
+      id: 109,
+      name: 'Capinha de silicone aveludada',
+      desc: 'Várias cores disponíveis, interior em microfibra e toque macio.',
+      price: 49.9,
+      installments: 12,
+      category: 'capinhas',
+      img: '/src/assets/images/energy_magsafe_cases_1794316758693.jpg',
+    },
+    {
+      id: 110,
+      name: 'Troca de tela (iPhone e Samsung)',
+      desc: 'Peça com garantia e instalação técnica especializada.',
+      price: 349.0,
+      installments: 12,
+      category: 'assistencia',
+      img: '/src/assets/images/energy_tech_repair_1794316759661.jpg',
+    },
+    {
+      id: 111,
+      name: 'Troca de bateria expressa',
+      desc: 'Feita na hora em laboratório próprio, com garantia.',
+      price: 199.0,
+      installments: 12,
+      category: 'assistencia',
+      img: '/src/assets/images/energy_tech_repair_1794316759661.jpg',
+    },
+    {
+      id: 112,
+      name: 'Película 3D + instalação',
+      desc: 'Aplicada na loja por especialista, alinhamento perfeito sem bolhas.',
+      price: 39.9,
+      installments: 12,
+      category: 'assistencia',
+      img: '/src/assets/images/energy_tech_repair_1794316759661.jpg',
+    },
+  ],
+};
+
+export const INITIAL_STORES: SavedStoreEntry[] = [
+  {
+    id: 'duda-mello',
+    label: 'Loja 1: Duda Mello Boutique',
+    domainRef: 'dudamelloboutique.nourbiosite.com.br',
+    config: DUDA_MELLO_CONFIG,
+  },
+  {
+    id: 'energy-stor3',
+    label: 'Loja 2: Energy Stor3',
+    domainRef: 'energystor3.nourbiosite.com.br',
+    config: ENERGY_STOR3_CONFIG,
+  },
+];

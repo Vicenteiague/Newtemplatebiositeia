@@ -27,16 +27,44 @@ import {
   X,
   Sun,
   Moon,
+  Store,
 } from 'lucide-react';
 import {
-  DUDA_MELLO_CONFIG,
+  INITIAL_STORES,
+  SavedStoreEntry,
   StoreConfig,
   ProductItem,
 } from './data/defaultStoreConfig';
 import { generateSingleFileHtml } from './utils/generateSingleFileHtml';
 
 export default function App() {
-  const [config, setConfig] = useState<StoreConfig>(DUDA_MELLO_CONFIG);
+  const [stores, setStores] = useState<SavedStoreEntry[]>(INITIAL_STORES);
+  const [activeStoreId, setActiveStoreId] = useState<string>('energy-stor3');
+
+  const activeStoreEntry = useMemo(
+    () => stores.find((s) => s.id === activeStoreId) || stores[0],
+    [stores, activeStoreId]
+  );
+
+  const config = activeStoreEntry.config;
+
+  const setConfig = (
+    updater: StoreConfig | ((prev: StoreConfig) => StoreConfig)
+  ) => {
+    setStores((prevStores) =>
+      prevStores.map((entry) => {
+        if (entry.id !== activeStoreEntry.id) return entry;
+        const nextConfig =
+          typeof updater === 'function' ? updater(entry.config) : updater;
+        return {
+          ...entry,
+          label: nextConfig.storeName,
+          config: nextConfig,
+        };
+      })
+    );
+  };
+
   const [isDark, setIsDark] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('biosite_studio_theme');
@@ -47,6 +75,7 @@ export default function App() {
     }
     return true;
   });
+
   const [activeCategory, setActiveCategory] = useState<string>('todos');
   const [sortBy, setSortBy] = useState<'rel' | 'menor' | 'maior'>('rel');
   const [cart, setCart] = useState<number[]>([]);
@@ -61,7 +90,13 @@ export default function App() {
   const [newProdName, setNewProdName] = useState('');
   const [newProdDesc, setNewProdDesc] = useState('');
   const [newProdPrice, setNewProdPrice] = useState('');
-  const [newProdCategory, setNewProdCategory] = useState('bolsas');
+  const [newProdCategory, setNewProdCategory] = useState('');
+
+  // Sync default category in form when switching stores
+  useEffect(() => {
+    const firstNonAll = config.categories.find((c) => c.id !== 'todos');
+    setNewProdCategory(firstNonAll ? firstNonAll.id : 'todos');
+  }, [activeStoreId, config.categories]);
 
   // Sync theme with <html class="dark">
   useEffect(() => {
@@ -102,6 +137,39 @@ export default function App() {
       secs: String(s).padStart(2, '0'),
     };
   }, [remainingSeconds]);
+
+  // Switch active store without losing previous stores
+  const handleSelectStore = (storeId: string) => {
+    setActiveStoreId(storeId);
+    setActiveCategory('todos');
+    setCart([]);
+    setSortBy('rel');
+  };
+
+  // Create a brand new store cloned from the current template
+  const handleCreateNewStore = () => {
+    const nextNumber = stores.length + 1;
+    const newId = `loja-${Date.now()}`;
+    const clonedConfig: StoreConfig = JSON.parse(JSON.stringify(config));
+    clonedConfig.storeName = `Nova Loja ${nextNumber}`;
+    const newEntry: SavedStoreEntry = {
+      id: newId,
+      label: `Loja ${nextNumber}: Nova Loja`,
+      domainRef: `novaloja${nextNumber}.nourbiosite.com.br`,
+      config: clonedConfig,
+    };
+    setStores((prev) => [...prev, newEntry]);
+    setActiveStoreId(newId);
+    setActiveCategory('todos');
+    setCart([]);
+    setStudioTab('editor');
+  };
+
+  const handleRestoreInitialStores = () => {
+    setStores(INITIAL_STORES);
+    setActiveCategory('todos');
+    setCart([]);
+  };
 
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
@@ -257,14 +325,12 @@ export default function App() {
       name: newProdName.trim(),
       desc:
         newProdDesc.trim() ||
-        'Peça selecionada com acabamento premium e pronta entrega.',
+        'Produto disponível com garantia e atendimento rápido pelo WhatsApp.',
       price:
         parsedPrice !== null && !Number.isNaN(parsedPrice) ? parsedPrice : null,
       installments: config.maxInstallments,
       category: newProdCategory,
-      img:
-        categoryObj?.img ||
-        '/src/assets/images/product_handbag_classic_1794314339171.jpg',
+      img: categoryObj?.img || config.logoUrl,
     };
     setConfig((prev) => ({
       ...prev,
@@ -341,6 +407,43 @@ export default function App() {
 
       {/* WORKSPACE CONTAINER: Full responsive layout on desktop (BioSite + Live HTML5 Template Generator) */}
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 pt-0 sm:pt-6">
+        {/* MULTI-STORE SWITCHER BAR (Mantém Duda Mello Boutique + Energy Stor3 + Criar Nova Loja) */}
+        <div className="px-4 sm:px-0 py-3 mb-2 sm:mb-5 flex flex-wrap items-center justify-between gap-3 border-b sm:border border-stone-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/70 sm:rounded-2xl sm:p-4">
+          <div className="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-300">
+            <Store className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>Escolha a Loja no mesmo Template:</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {stores.map((storeEntry) => {
+              const isSelected = storeEntry.id === activeStoreEntry.id;
+              return (
+                <button
+                  key={storeEntry.id}
+                  type="button"
+                  onClick={() => handleSelectStore(storeEntry.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-400 text-neutral-950 shadow-sm'
+                      : 'bg-stone-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-stone-300 dark:hover:bg-neutral-700'
+                  }`}
+                >
+                  {storeEntry.config.storeName}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={handleCreateNewStore}
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nova Loja</span>
+            </button>
+          </div>
+        </div>
+
         <div className="lg:grid lg:grid-cols-12 lg:gap-10 items-start">
           {/* LEFT/CENTER COLUMN: THE CLONED MOBILE-FIRST BIOSITE & MINI-CATALOG (max-w-md mx-auto) */}
           <div className="lg:col-span-5 xl:col-span-5">
@@ -358,9 +461,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setIsDark((prev) => !prev)}
-                  aria-label={
-                    isDark ? 'Ativar Modo Dia' : 'Ativar Modo Noite'
-                  }
+                  aria-label={isDark ? 'Ativar Modo Dia' : 'Ativar Modo Noite'}
                   className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-stone-200/80 dark:bg-neutral-800 hover:bg-stone-300/70 dark:hover:bg-neutral-700 border border-stone-300/80 dark:border-neutral-700 text-xs font-semibold text-neutral-900 dark:text-neutral-100 transition-colors cursor-pointer whitespace-nowrap shrink-0 min-h-[36px]"
                 >
                   {isDark ? (
@@ -380,18 +481,20 @@ export default function App() {
               {/* 1. HEADER DO PERFIL */}
               <div className="relative pt-8 pb-6 px-6 text-center bg-gradient-to-b from-amber-500/15 via-stone-50/40 dark:via-neutral-900/40 to-transparent">
                 <div className="relative w-24 h-24 mx-auto mb-4 rounded-full p-1 bg-gradient-to-tr from-amber-500 to-yellow-300 shadow-lg shadow-amber-500/20">
-                  {!brokenImages['logo'] ? (
+                  {!brokenImages[`logo-${activeStoreEntry.id}`] ? (
                     <img
                       id="store-logo"
                       src={config.logoUrl}
                       alt={`Logo ${config.storeName}`}
                       referrerPolicy="no-referrer"
-                      onError={() => markImageBroken('logo')}
+                      onError={() =>
+                        markImageBroken(`logo-${activeStoreEntry.id}`)
+                      }
                       className="w-full h-full object-cover rounded-full border-2 border-white dark:border-neutral-950"
                     />
                   ) : (
                     <div className="w-full h-full rounded-full border-2 border-white dark:border-neutral-950 bg-stone-100 dark:bg-neutral-900 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold text-xl">
-                      DM
+                      {config.storeName.slice(0, 2).toUpperCase()}
                     </div>
                   )}
                 </div>
@@ -613,7 +716,7 @@ export default function App() {
                 >
                   {config.categories.map((cat) => {
                     const isActive = activeCategory === cat.id;
-                    const imgKey = `cat-${cat.id}`;
+                    const imgKey = `cat-${activeStoreEntry.id}-${cat.id}`;
                     return (
                       <button
                         key={cat.id}
@@ -708,7 +811,7 @@ export default function App() {
                 <div id="products-grid" className="grid grid-cols-2 gap-3">
                   {filteredProducts.map((p) => {
                     const inCart = cart.includes(p.id);
-                    const imgKey = `prod-${p.id}`;
+                    const imgKey = `prod-${activeStoreEntry.id}-${p.id}`;
                     const inst = p.installments || config.maxInstallments || 10;
                     return (
                       <article
@@ -901,7 +1004,7 @@ export default function App() {
               {/* 8. SEÇÃO SOBRE + TAGS + 4 FAQs */}
               <section id="sobre-faq" className="px-5 py-4 space-y-4">
                 <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
-                  Sobre a Loja
+                  Sobre {config.storeName}
                 </h2>
                 <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">
                   {config.aboutText}
@@ -1029,11 +1132,12 @@ export default function App() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 dark:border-neutral-800 pb-5">
                 <div>
                   <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
-                    Gerador de Template BioSite & Catálogo (HTML5 Único)
+                    Template HTML5 — {config.storeName}
                   </h2>
                   <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-                    Inclui o botão <b>Modo Dia / Noite</b> no topo da vitrine.
-                    Personalize os dados ou copie o código HTML5 completo.
+                    O mesmo template (11 seções + Modo Dia/Noite) adaptado para{' '}
+                    <b>{config.storeName}</b>. Você pode alternar entre as lojas
+                    acima sem perder nenhuma.
                   </p>
                 </div>
 
@@ -1079,7 +1183,7 @@ export default function App() {
                     }`}
                   >
                     <Code2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Código HTML5 Completo</span>
+                    <span>Código HTML5 ({config.storeName})</span>
                   </button>
                   <button
                     type="button"
@@ -1091,7 +1195,7 @@ export default function App() {
                     }`}
                   >
                     <SlidersHorizontal className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Adaptar Dados do Cliente</span>
+                    <span>Editar Dados desta Loja</span>
                   </button>
                 </div>
 
@@ -1116,11 +1220,7 @@ export default function App() {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setConfig(DUDA_MELLO_CONFIG);
-                      setCart([]);
-                      setActiveCategory('todos');
-                    }}
+                    onClick={handleRestoreInitialStores}
                     className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -1133,8 +1233,8 @@ export default function App() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
                     <span>
-                      Arquivo único com Modo Dia/Noite integrado · Tailwind CDN
-                      + Lucide Icons + JS Vanilla
+                      Arquivo único de <b>{config.storeName}</b> com Modo
+                      Dia/Noite · Tailwind CDN + Lucide Icons + JS Vanilla
                     </span>
                     <span className="font-mono tabular-nums">
                       {singleFileHtmlCode.split('\n').length} linhas
@@ -1191,17 +1291,21 @@ export default function App() {
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        WhatsApp (com DDI + DDD)
+                        Telefone / WhatsApp
                       </label>
                       <input
                         type="text"
-                        value={config.whatsappNumber}
-                        onChange={(e) =>
+                        value={config.phoneTel}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const digits = val.replace(/\D/g, '');
                           setConfig({
                             ...config,
-                            whatsappNumber: e.target.value,
-                          })
-                        }
+                            whatsappNumber: digits || val,
+                            phoneTel: val.startsWith('+') ? val : `+${digits}`,
+                            phoneDisplay: val,
+                          });
+                        }}
                         className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white font-mono focus:outline-none focus:border-amber-400"
                       />
                     </div>
@@ -1335,7 +1439,7 @@ export default function App() {
                   {/* Bloco 3: Gerenciar Produtos do Catálogo */}
                   <div className="pt-4 border-t border-stone-200 dark:border-neutral-800 space-y-4">
                     <h3 className="text-sm font-bold text-neutral-900 dark:text-white">
-                      Adicionar Produto ao Catálogo
+                      Adicionar Produto ao Catálogo ({config.storeName})
                     </h3>
                     <form
                       onSubmit={handleAddProduct}
@@ -1370,7 +1474,7 @@ export default function App() {
                       </select>
                       <input
                         type="text"
-                        placeholder="Descrição curta da peça"
+                        placeholder="Descrição curta do item"
                         value={newProdDesc}
                         onChange={(e) => setNewProdDesc(e.target.value)}
                         className="sm:col-span-3 bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
@@ -1380,7 +1484,7 @@ export default function App() {
                         className="bg-amber-400 hover:bg-amber-300 text-neutral-950 font-bold text-xs rounded-xl px-4 py-2 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <Plus className="w-4 h-4" />
-                        <span>Incluir Peça</span>
+                        <span>Incluir Item</span>
                       </button>
                     </form>
 
@@ -1470,7 +1574,7 @@ export default function App() {
             <div className="flex items-center justify-between border-b border-stone-200 dark:border-neutral-800 pb-3">
               <div>
                 <h3 className="text-base font-bold text-neutral-900 dark:text-white">
-                  Seu Pedido no WhatsApp
+                  Seu Pedido no WhatsApp ({config.storeName})
                 </h3>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   Mensagem automática pronta para envio

@@ -4,6 +4,7 @@ export function generateSingleFileHtml(
   config: StoreConfig,
   defaultTheme: 'dark' | 'light' = 'dark'
 ): string {
+  const cleanWa = config.whatsappNumber.replace(/\D/g, '');
   const wifiQrData =
     config.wifiEncryption === 'nopass' || !config.wifiPassword
       ? `WIFI:T:nopass;S:${encodeURIComponent(config.wifiSsid)};;`
@@ -133,7 +134,7 @@ export function generateSingleFileHtml(
     <!-- 4. BLOCO DE LINKS PRINCIPAIS -->
     <section class="p-5 space-y-3" aria-label="Links principais">
       <!-- Card 1 (Destaque Principal): WhatsApp -->
-      <a id="link-whatsapp-hero" href="https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(config.whatsappHeroText)}" target="_blank" rel="noopener"
+      <a id="link-whatsapp-hero" href="https://wa.me/${cleanWa}?text=${encodeURIComponent(config.whatsappHeroText)}" target="_blank" rel="noopener"
          class="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-950/20 dark:shadow-emerald-950/50 hover:scale-[1.01] transition">
         <div class="flex items-center gap-3.5">
           <div class="p-2.5 bg-white/15 rounded-xl">
@@ -250,7 +251,7 @@ export function generateSingleFileHtml(
         <div class="bg-white/90 dark:bg-neutral-950/80 border border-stone-200 dark:border-neutral-800 rounded-xl p-2"><b id="t-mins" class="text-lg text-neutral-900 dark:text-white block">35</b><small class="text-[10px] text-neutral-500 dark:text-neutral-400">min</small></div>
         <div class="bg-white/90 dark:bg-neutral-950/80 border border-stone-200 dark:border-neutral-800 rounded-xl p-2"><b id="t-secs" class="text-lg text-amber-600 dark:text-amber-400 block">40</b><small class="text-[10px] text-neutral-500 dark:text-neutral-400">seg</small></div>
       </div>
-      <a href="https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(config.offerWhatsappText)}" target="_blank" rel="noopener"
+      <a href="https://wa.me/${cleanWa}?text=${encodeURIComponent(config.offerWhatsappText)}" target="_blank" rel="noopener"
          class="block w-full text-center py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-neutral-950 font-bold text-sm transition">
         Garantir minha oferta
       </a>
@@ -326,7 +327,7 @@ ${faqsHtml}
   <script>
     const STORE_CONFIG = {
       storeName: ${JSON.stringify(config.storeName)},
-      whatsappNumber: ${JSON.stringify(config.whatsappNumber)},
+      whatsappNumber: ${JSON.stringify(cleanWa)},
       maxInstallments: ${config.maxInstallments},
       categories: ${categoriesJson},
       products: ${productsJson}
