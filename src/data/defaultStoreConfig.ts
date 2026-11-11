@@ -1,3 +1,14 @@
+import boutiqueAvatarLogo from '../assets/images/boutique_avatar_logo_1794314337709.jpg';
+import productHandbagClassic from '../assets/images/product_handbag_classic_1794314339171.jpg';
+import productDenimJacket from '../assets/images/product_denim_jacket_1794314339295.jpg';
+import productPapeteSandal from '../assets/images/product_papete_sandal_1794314340709.jpg';
+import productChunkySneaker from '../assets/images/product_chunky_sneaker_1794314340095.jpg';
+import energyStoreLogo from '../assets/images/energy_store_logo_1794316756322.jpg';
+import energySmartphonesPro from '../assets/images/energy_smartphones_pro_1794316755805.jpg';
+import energyWirelessEarbuds from '../assets/images/energy_wireless_earbuds_1794316757804.jpg';
+import energyMagsafeCases from '../assets/images/energy_magsafe_cases_1794316758693.jpg';
+import energyTechRepair from '../assets/images/energy_tech_repair_1794316759661.jpg';
+
 export interface CategoryItem {
   id: string;
   name: string;
@@ -72,7 +83,7 @@ export interface SavedStoreEntry {
 export const DUDA_MELLO_CONFIG: StoreConfig = {
   storeName: 'Duda Mello Boutique',
   slogan: 'Moda com estilo para brilhar em qualquer dia.',
-  logoUrl: '/src/assets/images/boutique_avatar_logo_1794314337709.jpg',
+  logoUrl: boutiqueAvatarLogo,
   specialties: ['Moda feminina', 'Moda masculina', 'Infantil', 'Calçados'],
   cityState: 'Itatinga/SP',
   marqueePhrase1: 'NOVIDADES TODA SEMANA',
@@ -141,22 +152,22 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
     {
       id: 'todos',
       name: 'Tudo',
-      img: '/src/assets/images/boutique_avatar_logo_1794314337709.jpg',
+      img: boutiqueAvatarLogo,
     },
     {
       id: 'bolsas',
       name: 'Bolsas',
-      img: '/src/assets/images/product_handbag_classic_1794314339171.jpg',
+      img: productHandbagClassic,
     },
     {
       id: 'feminino',
       name: 'Moda feminina',
-      img: '/src/assets/images/product_denim_jacket_1794314339295.jpg',
+      img: productDenimJacket,
     },
     {
       id: 'calcados',
       name: 'Calçados',
-      img: '/src/assets/images/product_papete_sandal_1794314340709.jpg',
+      img: productPapeteSandal,
     },
   ],
   products: [
@@ -167,7 +178,7 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
       price: null,
       installments: 10,
       category: 'bolsas',
-      img: '/src/assets/images/product_handbag_classic_1794314339171.jpg',
+      img: productHandbagClassic,
       featured: true,
     },
     {
@@ -177,7 +188,7 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
       price: null,
       installments: 10,
       category: 'feminino',
-      img: '/src/assets/images/product_denim_jacket_1794314339295.jpg',
+      img: productDenimJacket,
       featured: true,
     },
     {
@@ -187,7 +198,7 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
       price: 89.9,
       installments: 10,
       category: 'calcados',
-      img: '/src/assets/images/product_papete_sandal_1794314340709.jpg',
+      img: productPapeteSandal,
       featured: true,
     },
     {
@@ -197,7 +208,7 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
       price: 299.9,
       installments: 10,
       category: 'calcados',
-      img: '/src/assets/images/product_chunky_sneaker_1794314340095.jpg',
+      img: productChunkySneaker,
       featured: true,
     },
     {
@@ -207,7 +218,7 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
       price: 189.9,
       installments: 10,
       category: 'bolsas',
-      img: '/src/assets/images/product_handbag_classic_1794314339171.jpg',
+      img: productHandbagClassic,
     },
     {
       id: 6,
@@ -216,7 +227,7 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
       price: 249.9,
       installments: 10,
       category: 'feminino',
-      img: '/src/assets/images/product_denim_jacket_1794314339295.jpg',
+      img: productDenimJacket,
     },
   ],
 };
@@ -225,7 +236,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
   storeName: 'Energy Stor3',
   slogan:
     'Eletrônicos, acessórios e assistência técnica. Quase 10 anos de mercado.',
-  logoUrl: '/src/assets/images/energy_store_logo_1794316756322.jpg',
+  logoUrl: energyStoreLogo,
   specialties: ['Celulares', 'Acessórios', 'Assistência técnica', 'Atacado'],
   cityState: 'São Paulo/SP',
   marqueePhrase1: 'CELULARES · ACESSÓRIOS · GAMES',
@@ -300,27 +311,27 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
     {
       id: 'todos',
       name: 'Tudo',
-      img: '/src/assets/images/energy_store_logo_1794316756322.jpg',
+      img: energyStoreLogo,
     },
     {
       id: 'celulares',
       name: 'Celulares',
-      img: '/src/assets/images/energy_smartphones_pro_1794316755805.jpg',
+      img: energySmartphonesPro,
     },
     {
       id: 'fones',
       name: 'Fones de ouvido',
-      img: '/src/assets/images/energy_wireless_earbuds_1794316757804.jpg',
+      img: energyWirelessEarbuds,
     },
     {
       id: 'capinhas',
       name: 'Capinhas',
-      img: '/src/assets/images/energy_magsafe_cases_1794316758693.jpg',
+      img: energyMagsafeCases,
     },
     {
       id: 'assistencia',
       name: 'Assistência técnica',
-      img: '/src/assets/images/energy_tech_repair_1794316759661.jpg',
+      img: energyTechRepair,
     },
   ],
   products: [
@@ -331,7 +342,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 11499.0,
       installments: 12,
       category: 'celulares',
-      img: '/src/assets/images/energy_smartphones_pro_1794316755805.jpg',
+      img: energySmartphonesPro,
       featured: true,
     },
     {
@@ -341,7 +352,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 7999.0,
       installments: 12,
       category: 'celulares',
-      img: '/src/assets/images/energy_smartphones_pro_1794316755805.jpg',
+      img: energySmartphonesPro,
       featured: true,
     },
     {
@@ -351,7 +362,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 2199.0,
       installments: 12,
       category: 'celulares',
-      img: '/src/assets/images/energy_smartphones_pro_1794316755805.jpg',
+      img: energySmartphonesPro,
     },
     {
       id: 104,
@@ -360,7 +371,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 2499.0,
       installments: 12,
       category: 'fones',
-      img: '/src/assets/images/energy_wireless_earbuds_1794316757804.jpg',
+      img: energyWirelessEarbuds,
       featured: true,
     },
     {
@@ -370,7 +381,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 1499.0,
       installments: 12,
       category: 'fones',
-      img: '/src/assets/images/energy_wireless_earbuds_1794316757804.jpg',
+      img: energyWirelessEarbuds,
     },
     {
       id: 106,
@@ -379,7 +390,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 599.0,
       installments: 12,
       category: 'fones',
-      img: '/src/assets/images/energy_wireless_earbuds_1794316757804.jpg',
+      img: energyWirelessEarbuds,
     },
     {
       id: 107,
@@ -388,7 +399,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 89.9,
       installments: 12,
       category: 'capinhas',
-      img: '/src/assets/images/energy_magsafe_cases_1794316758693.jpg',
+      img: energyMagsafeCases,
     },
     {
       id: 108,
@@ -397,7 +408,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 59.9,
       installments: 12,
       category: 'capinhas',
-      img: '/src/assets/images/energy_magsafe_cases_1794316758693.jpg',
+      img: energyMagsafeCases,
     },
     {
       id: 109,
@@ -406,7 +417,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 49.9,
       installments: 12,
       category: 'capinhas',
-      img: '/src/assets/images/energy_magsafe_cases_1794316758693.jpg',
+      img: energyMagsafeCases,
     },
     {
       id: 110,
@@ -415,7 +426,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 349.0,
       installments: 12,
       category: 'assistencia',
-      img: '/src/assets/images/energy_tech_repair_1794316759661.jpg',
+      img: energyTechRepair,
     },
     {
       id: 111,
@@ -424,7 +435,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 199.0,
       installments: 12,
       category: 'assistencia',
-      img: '/src/assets/images/energy_tech_repair_1794316759661.jpg',
+      img: energyTechRepair,
     },
     {
       id: 112,
@@ -433,7 +444,7 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
       price: 39.9,
       installments: 12,
       category: 'assistencia',
-      img: '/src/assets/images/energy_tech_repair_1794316759661.jpg',
+      img: energyTechRepair,
     },
   ],
 };

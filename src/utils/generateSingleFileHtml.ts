@@ -48,8 +48,25 @@ export function generateSingleFileHtml(
     )
     .join('\n');
 
-  const categoriesJson = JSON.stringify(config.categories, null, 8);
-  const productsJson = JSON.stringify(config.products, null, 8);
+  const toAbsUrl = (u: string) => {
+    if (!u) return u;
+    if (typeof window !== 'undefined' && u.startsWith('/')) {
+      return `${window.location.origin}${u}`;
+    }
+    return u;
+  };
+
+  const resolvedLogoUrl = toAbsUrl(config.logoUrl);
+  const categoriesJson = JSON.stringify(
+    config.categories.map((c) => ({ ...c, img: toAbsUrl(c.img) })),
+    null,
+    8
+  );
+  const productsJson = JSON.stringify(
+    config.products.map((p) => ({ ...p, img: toAbsUrl(p.img) })),
+    null,
+    8
+  );
 
   return `<!DOCTYPE html>
 <html lang="pt-BR" class="${defaultTheme === 'dark' ? 'dark ' : ''}scroll-smooth">
@@ -108,7 +125,7 @@ export function generateSingleFileHtml(
     <!-- 2. HEADER DO PERFIL -->
     <header class="relative pt-8 pb-6 px-6 text-center bg-gradient-to-b from-amber-500/15 via-stone-50/40 dark:via-neutral-900/40 to-transparent">
       <div class="relative w-24 h-24 mx-auto mb-4 rounded-full p-1 bg-gradient-to-tr from-amber-500 to-yellow-300 shadow-lg shadow-amber-500/20">
-        <img id="store-logo" src="${config.logoUrl}" alt="Logo ${config.storeName}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-full border-2 border-white dark:border-neutral-950" />
+        <img id="store-logo" src="${resolvedLogoUrl}" alt="Logo ${config.storeName}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-full border-2 border-white dark:border-neutral-950" />
       </div>
       <h1 id="store-name" class="text-2xl font-extrabold tracking-tight text-neutral-900 dark:text-white">${config.storeName}</h1>
       <p id="store-slogan" class="text-sm text-neutral-600 dark:text-neutral-300 mt-1">${config.slogan}</p>

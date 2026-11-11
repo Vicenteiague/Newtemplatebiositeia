@@ -28,6 +28,8 @@ import {
   Sun,
   Moon,
   Store,
+  Eye,
+  Share2,
 } from 'lucide-react';
 import {
   INITIAL_STORES,
@@ -37,9 +39,48 @@ import {
 } from './data/defaultStoreConfig';
 import { generateSingleFileHtml } from './utils/generateSingleFileHtml';
 
+function detectInitialRoute(): {
+  storeId: string;
+  customerViewOnly: boolean;
+} {
+  if (typeof window === 'undefined') {
+    return { storeId: 'energy-stor3', customerViewOnly: false };
+  }
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  const queryStore = params.get('loja')?.toLowerCase();
+  const queryMode = params.get('modo')?.toLowerCase();
+
+  if (path === 'duda-mello' || path === 'dudamelloboutique') {
+    return { storeId: 'duda-mello', customerViewOnly: queryMode !== 'studio' };
+  }
+  if (path === 'energy-stor3' || path === 'energystor3') {
+    return {
+      storeId: 'energy-stor3',
+      customerViewOnly: queryMode !== 'studio',
+    };
+  }
+  if (queryStore === 'duda-mello' || queryStore === 'energy-stor3') {
+    return {
+      storeId: queryStore,
+      customerViewOnly: queryMode === 'vitrine' || queryMode === 'cliente',
+    };
+  }
+  return {
+    storeId: 'energy-stor3',
+    customerViewOnly: queryMode === 'vitrine' || queryMode === 'cliente',
+  };
+}
+
 export default function App() {
+  const initialRoute = useMemo(() => detectInitialRoute(), []);
   const [stores, setStores] = useState<SavedStoreEntry[]>(INITIAL_STORES);
-  const [activeStoreId, setActiveStoreId] = useState<string>('energy-stor3');
+  const [activeStoreId, setActiveStoreId] = useState<string>(
+    initialRoute.storeId
+  );
+  const [isCustomerView, setIsCustomerView] = useState<boolean>(
+    initialRoute.customerViewOnly
+  );
 
   const activeStoreEntry = useMemo(
     () => stores.find((s) => s.id === activeStoreId) || stores[0],
@@ -47,6 +88,11 @@ export default function App() {
   );
 
   const config = activeStoreEntry.config;
+
+  // Dynamic document title for Vercel routes
+  useEffect(() => {
+    document.title = `${config.storeName} — ${config.slogan}`;
+  }, [config.storeName, config.slogan]);
 
   const setConfig = (
     updater: StoreConfig | ((prev: StoreConfig) => StoreConfig)
@@ -82,6 +128,7 @@ export default function App() {
   const [copiedHtml, setCopiedHtml] = useState(false);
   const [copiedWifi, setCopiedWifi] = useState(false);
   const [copiedWhatsappMsg, setCopiedWhatsappMsg] = useState(false);
+  const [copiedVercelUrl, setCopiedVercelUrl] = useState(false);
   const [studioTab, setStudioTab] = useState<'editor' | 'code'>('code');
   const [orderPreviewOpen, setOrderPreviewOpen] = useState(false);
   const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
@@ -241,6 +288,12 @@ export default function App() {
     [config, isDark]
   );
 
+  const storeDirectPath = useMemo(() => {
+    if (activeStoreEntry.id === 'energy-stor3') return '/energy-stor3';
+    if (activeStoreEntry.id === 'duda-mello') return '/duda-mello';
+    return `/?loja=${activeStoreEntry.id}&modo=vitrine`;
+  }, [activeStoreEntry.id]);
+
   const toggleCart = (productId: number) => {
     setCart((prev) =>
       prev.includes(productId)
@@ -263,6 +316,21 @@ export default function App() {
       document.body.removeChild(textarea);
       setCopiedHtml(true);
       setTimeout(() => setCopiedHtml(false), 2500);
+    }
+  };
+
+  const handleCopyVercelLink = async () => {
+    const fullUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}${storeDirectPath}`
+        : storeDirectPath;
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      setCopiedVercelUrl(true);
+      setTimeout(() => setCopiedVercelUrl(false), 2200);
+    } catch {
+      setCopiedVercelUrl(true);
+      setTimeout(() => setCopiedVercelUrl(false), 2200);
     }
   };
 
@@ -387,66 +455,76 @@ export default function App() {
             Perguntas
           </a>
           <a
-            href="#codigo-html"
+            href={`https://wa.me/${config.whatsappNumber.replace(/\D/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="hover:text-neutral-900 dark:hover:text-white transition-colors whitespace-nowrap shrink-0"
           >
-            Template HTML5
+            Atendimento
           </a>
         </nav>
 
         <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
-            onClick={handleCopyHtml}
+            onClick={() => setIsCustomerView((prev) => !prev)}
             className="px-4 py-2 text-xs font-bold text-neutral-950 bg-amber-400 rounded-xl hover:bg-amber-300 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
-            {copiedHtml ? '✓ HTML Copiado!' : 'Copiar HTML Único'}
+            {isCustomerView ? 'Abrir Painel Studio' : 'Ver como Cliente'}
           </button>
         </div>
       </header>
 
-      {/* WORKSPACE CONTAINER: Full responsive layout on desktop (BioSite + Live HTML5 Template Generator) */}
+      {/* WORKSPACE CONTAINER */}
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 pt-0 sm:pt-6">
-        {/* MULTI-STORE SWITCHER BAR (Mantém Duda Mello Boutique + Energy Stor3 + Criar Nova Loja) */}
-        <div className="px-4 sm:px-0 py-3 mb-2 sm:mb-5 flex flex-wrap items-center justify-between gap-3 border-b sm:border border-stone-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/70 sm:rounded-2xl sm:p-4">
-          <div className="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-300">
-            <Store className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-            <span>Escolha a Loja no mesmo Template:</span>
+        {/* MULTI-STORE SWITCHER BAR (Only visible in Studio Mode) */}
+        {!isCustomerView && (
+          <div className="px-4 sm:px-0 py-3 mb-2 sm:mb-5 flex flex-wrap items-center justify-between gap-3 border-b sm:border border-stone-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/70 sm:rounded-2xl sm:p-4">
+            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-300">
+              <Store className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span>Escolha a Loja (Pronto para Deploy Vercel):</span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {stores.map((storeEntry) => {
+                const isSelected = storeEntry.id === activeStoreEntry.id;
+                return (
+                  <button
+                    key={storeEntry.id}
+                    type="button"
+                    onClick={() => handleSelectStore(storeEntry.id)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
+                      isSelected
+                        ? 'bg-amber-400 text-neutral-950 shadow-sm'
+                        : 'bg-stone-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-stone-300 dark:hover:bg-neutral-700'
+                    }`}
+                  >
+                    {storeEntry.config.storeName}
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={handleCreateNewStore}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Nova Loja</span>
+              </button>
+            </div>
           </div>
+        )}
 
-          <div className="flex flex-wrap items-center gap-2">
-            {stores.map((storeEntry) => {
-              const isSelected = storeEntry.id === activeStoreEntry.id;
-              return (
-                <button
-                  key={storeEntry.id}
-                  type="button"
-                  onClick={() => handleSelectStore(storeEntry.id)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
-                    isSelected
-                      ? 'bg-amber-400 text-neutral-950 shadow-sm'
-                      : 'bg-stone-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-stone-300 dark:hover:bg-neutral-700'
-                  }`}
-                >
-                  {storeEntry.config.storeName}
-                </button>
-              );
-            })}
-
-            <button
-              type="button"
-              onClick={handleCreateNewStore}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Nova Loja</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="lg:grid lg:grid-cols-12 lg:gap-10 items-start">
-          {/* LEFT/CENTER COLUMN: THE CLONED MOBILE-FIRST BIOSITE & MINI-CATALOG (max-w-md mx-auto) */}
-          <div className="lg:col-span-5 xl:col-span-5">
+        <div
+          className={
+            isCustomerView
+              ? 'max-w-md mx-auto'
+              : 'lg:grid lg:grid-cols-12 lg:gap-10 items-start'
+          }
+        >
+          {/* THE CLONED MOBILE-FIRST BIOSITE & MINI-CATALOG (max-w-md mx-auto) */}
+          <div className={isCustomerView ? '' : 'lg:col-span-5 xl:col-span-5'}>
             <main
               id="perfil"
               className="max-w-md mx-auto bg-white dark:bg-neutral-900/60 min-h-screen sm:rounded-3xl border-x sm:border border-stone-200 dark:border-neutral-800/80 shadow-2xl overflow-hidden transition-colors duration-200"
@@ -513,7 +591,7 @@ export default function App() {
                   {config.slogan}
                 </p>
 
-                {/* Especialidades separadas por pontos (Zero-Pill clean text metadata) */}
+                {/* Especialidades separadas por pontos */}
                 <div
                   id="store-specialties"
                   className="flex flex-wrap items-center justify-center gap-2 text-xs text-amber-700 dark:text-amber-300/90 mt-3 font-medium"
@@ -1010,7 +1088,7 @@ export default function App() {
                   {config.aboutText}
                 </p>
 
-                {/* Tags de Produtos/Serviços (Zero-Pill clean unboxed typography) */}
+                {/* Tags de Produtos/Serviços */}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-amber-700 dark:text-amber-300/90 pt-1">
                   {config.serviceTags.map((tag, idx) => (
                     <React.Fragment key={tag}>
@@ -1123,404 +1201,447 @@ export default function App() {
             </main>
           </div>
 
-          {/* RIGHT COLUMN: TEMPLATE STUDIO & COMPLETE HTML5 CODE EXPORT */}
-          <aside
-            id="codigo-html"
-            className="lg:col-span-7 xl:col-span-7 mt-8 lg:mt-0 px-4 sm:px-0"
-          >
-            <div className="bg-white dark:bg-neutral-900/70 border border-stone-200 dark:border-neutral-800 rounded-3xl p-6 space-y-6 transition-colors duration-200">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 dark:border-neutral-800 pb-5">
-                <div>
-                  <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
-                    Template HTML5 — {config.storeName}
-                  </h2>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-                    O mesmo template (11 seções + Modo Dia/Noite) adaptado para{' '}
-                    <b>{config.storeName}</b>. Você pode alternar entre as lojas
-                    acima sem perder nenhuma.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleCopyHtml}
-                    className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-neutral-950 font-bold text-xs flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    {copiedHtml ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        <span>Código Copiado!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        <span>Copiar HTML Completo</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDownloadHtml}
-                    className="px-3.5 py-2.5 rounded-xl bg-stone-200 dark:bg-neutral-800 hover:bg-stone-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-semibold text-xs flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Baixar .html</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Segmented Control: Ver Código HTML5 vs Personalizar Dados do Cliente */}
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-neutral-950 rounded-xl border border-stone-200 dark:border-neutral-800">
-                  <button
-                    type="button"
-                    onClick={() => setStudioTab('code')}
-                    className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer ${
-                      studioTab === 'code'
-                        ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm'
-                        : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
-                    }`}
-                  >
-                    <Code2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Código HTML5 ({config.storeName})</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setStudioTab('editor')}
-                    className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer ${
-                      studioTab === 'editor'
-                        ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm'
-                        : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
-                    }`}
-                  >
-                    <SlidersHorizontal className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Editar Dados desta Loja</span>
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setIsDark((prev) => !prev)}
-                    className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-neutral-950 dark:hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700 transition-colors cursor-pointer whitespace-nowrap"
-                  >
-                    {isDark ? (
-                      <>
-                        <Sun className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Testar Modo Dia</span>
-                      </>
-                    ) : (
-                      <>
-                        <Moon className="w-3.5 h-3.5 text-amber-700" />
-                        <span>Testar Modo Noite</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleRestoreInitialStores}
-                    className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Restaurar Padrão</span>
-                  </button>
-                </div>
-              </div>
-
-              {studioTab === 'code' ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                    <span>
-                      Arquivo único de <b>{config.storeName}</b> com Modo
-                      Dia/Noite · Tailwind CDN + Lucide Icons + JS Vanilla
-                    </span>
-                    <span className="font-mono tabular-nums">
-                      {singleFileHtmlCode.split('\n').length} linhas
-                    </span>
-                  </div>
-                  <div className="relative rounded-2xl bg-neutral-950 border border-stone-300 dark:border-neutral-800 overflow-hidden">
-                    <pre className="p-4 text-xs font-mono text-neutral-200 overflow-x-auto max-h-[680px] leading-relaxed select-all">
-                      <code>{singleFileHtmlCode}</code>
-                    </pre>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Bloco 1: Perfil e Contato */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Nome do Negócio (h1)
-                      </label>
-                      <input
-                        type="text"
-                        value={config.storeName}
-                        onChange={(e) =>
-                          setConfig({ ...config, storeName: e.target.value })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Cidade / UF
-                      </label>
-                      <input
-                        type="text"
-                        value={config.cityState}
-                        onChange={(e) =>
-                          setConfig({ ...config, cityState: e.target.value })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Slogan Curto
-                      </label>
-                      <input
-                        type="text"
-                        value={config.slogan}
-                        onChange={(e) =>
-                          setConfig({ ...config, slogan: e.target.value })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Telefone / WhatsApp
-                      </label>
-                      <input
-                        type="text"
-                        value={config.phoneTel}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const digits = val.replace(/\D/g, '');
-                          setConfig({
-                            ...config,
-                            whatsappNumber: digits || val,
-                            phoneTel: val.startsWith('+') ? val : `+${digits}`,
-                            phoneDisplay: val,
-                          });
-                        }}
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white font-mono focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Arroba do Instagram
-                      </label>
-                      <input
-                        type="text"
-                        value={config.instagramHandle}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            instagramHandle: e.target.value,
-                          })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
+          {/* RIGHT COLUMN: TEMPLATE STUDIO & COMPLETE HTML5 CODE EXPORT (Hidden in Customer View) */}
+          {!isCustomerView && (
+            <aside
+              id="codigo-html"
+              className="lg:col-span-7 xl:col-span-7 mt-8 lg:mt-0 px-4 sm:px-0"
+            >
+              <div className="bg-white dark:bg-neutral-900/70 border border-stone-200 dark:border-neutral-800 rounded-3xl p-6 space-y-6 transition-colors duration-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 dark:border-neutral-800 pb-5">
+                  <div>
+                    <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
+                      Deploy Vercel & Código HTML5 — {config.storeName}
+                    </h2>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                      Projeto configurado com <code>vercel.json</code> e rotas
+                      diretas por loja (<code>/energy-stor3</code> e{' '}
+                      <code>/duda-mello</code>) para enviar aos clientes.
+                    </p>
                   </div>
 
-                  {/* Bloco 2: Marquee, Wi-Fi e Oferta Relâmpago */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-stone-200 dark:border-neutral-800">
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Frase Marquee 1
-                      </label>
-                      <input
-                        type="text"
-                        value={config.marqueePhrase1}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            marqueePhrase1: e.target.value,
-                          })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Frase Marquee 2
-                      </label>
-                      <input
-                        type="text"
-                        value={config.marqueePhrase2}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            marqueePhrase2: e.target.value,
-                          })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Nome da Rede Wi-Fi (SSID)
-                      </label>
-                      <input
-                        type="text"
-                        value={config.wifiSsid}
-                        onChange={(e) =>
-                          setConfig({ ...config, wifiSsid: e.target.value })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Senha do Wi-Fi (vazio = aberta)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Ex: cliente123 (ou deixe vazio)"
-                        value={config.wifiPassword}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            wifiPassword: e.target.value,
-                            wifiEncryption: e.target.value ? 'WPA' : 'nopass',
-                          })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Título da Oferta Relâmpago
-                      </label>
-                      <input
-                        type="text"
-                        value={config.offerTitle}
-                        onChange={(e) =>
-                          setConfig({ ...config, offerTitle: e.target.value })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Preço / Destaque da Oferta
-                      </label>
-                      <input
-                        type="text"
-                        value={config.offerPriceHighlight}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            offerPriceHighlight: e.target.value,
-                          })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                        Endereço Completo
-                      </label>
-                      <input
-                        type="text"
-                        value={config.address}
-                        onChange={(e) =>
-                          setConfig({ ...config, address: e.target.value })
-                        }
-                        className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Bloco 3: Gerenciar Produtos do Catálogo */}
-                  <div className="pt-4 border-t border-stone-200 dark:border-neutral-800 space-y-4">
-                    <h3 className="text-sm font-bold text-neutral-900 dark:text-white">
-                      Adicionar Produto ao Catálogo ({config.storeName})
-                    </h3>
-                    <form
-                      onSubmit={handleAddProduct}
-                      className="grid grid-cols-1 sm:grid-cols-4 gap-3"
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setIsCustomerView(true)}
+                      className="px-3.5 py-2.5 rounded-xl bg-stone-200 dark:bg-neutral-800 hover:bg-stone-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-semibold text-xs flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
                     >
-                      <input
-                        type="text"
-                        placeholder="Nome do produto"
-                        value={newProdName}
-                        onChange={(e) => setNewProdName(e.target.value)}
-                        className="sm:col-span-2 bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Preço (vazio = a combinar)"
-                        value={newProdPrice}
-                        onChange={(e) => setNewProdPrice(e.target.value)}
-                        className="bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                      <select
-                        value={newProdCategory}
-                        onChange={(e) => setNewProdCategory(e.target.value)}
-                        className="bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      >
-                        {config.categories
-                          .filter((c) => c.id !== 'todos')
-                          .map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name}
-                            </option>
-                          ))}
-                      </select>
-                      <input
-                        type="text"
-                        placeholder="Descrição curta do item"
-                        value={newProdDesc}
-                        onChange={(e) => setNewProdDesc(e.target.value)}
-                        className="sm:col-span-3 bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
-                      />
-                      <button
-                        type="submit"
-                        className="bg-amber-400 hover:bg-amber-300 text-neutral-950 font-bold text-xs rounded-xl px-4 py-2 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span>Incluir Item</span>
-                      </button>
-                    </form>
-
-                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                      {config.products.map((prod) => (
-                        <div
-                          key={prod.id}
-                          className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800/80 text-xs"
-                        >
-                          <div className="min-w-0">
-                            <b className="text-neutral-900 dark:text-white block truncate">
-                              {prod.name}
-                            </b>
-                            <span className="text-neutral-500 dark:text-neutral-400 tabular-nums">
-                              {prod.price !== null
-                                ? `R$ ${prod.price.toFixed(2).replace('.', ',')}`
-                                : 'Preço a combinar'}{' '}
-                              · {prod.category}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveProduct(prod.id)}
-                            aria-label={`Remover ${prod.name}`}
-                            className="p-2 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                      <Eye className="w-4 h-4" />
+                      <span>Modo Vitrine</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyHtml}
+                      className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-neutral-950 font-bold text-xs flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer"
+                    >
+                      {copiedHtml ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>Código Copiado!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          <span>Copiar HTML Completo</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadHtml}
+                      className="px-3.5 py-2.5 rounded-xl bg-stone-200 dark:bg-neutral-800 hover:bg-stone-300 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-semibold text-xs flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Baixar .html</span>
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-          </aside>
+
+                {/* VERCEL DIRECT ROUTE BOX */}
+                <div className="p-4 rounded-2xl bg-stone-100 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="text-xs space-y-0.5">
+                    <b className="text-neutral-900 dark:text-white block">
+                      Link Direto da Vitrine na Vercel (Visão Limpa do Cliente):
+                    </b>
+                    <span className="text-neutral-500 dark:text-neutral-400 font-mono">
+                      {storeDirectPath}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyVercelLink}
+                    className="px-3.5 py-2 rounded-xl bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer self-start sm:self-auto"
+                  >
+                    {copiedVercelUrl ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Link da Vitrine Copiado!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Copiar Link da Vitrine</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Segmented Control: Ver Código HTML5 vs Personalizar Dados do Cliente */}
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-neutral-950 rounded-xl border border-stone-200 dark:border-neutral-800">
+                    <button
+                      type="button"
+                      onClick={() => setStudioTab('code')}
+                      className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer ${
+                        studioTab === 'code'
+                          ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <Code2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <span>Código HTML5 ({config.storeName})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStudioTab('editor')}
+                      className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer ${
+                        studioTab === 'editor'
+                          ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <SlidersHorizontal className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <span>Editar Dados desta Loja</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsDark((prev) => !prev)}
+                      className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700 transition-colors cursor-pointer whitespace-nowrap"
+                    >
+                      {isDark ? (
+                        <>
+                          <Sun className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Testar Modo Dia</span>
+                        </>
+                      ) : (
+                        <>
+                          <Moon className="w-3.5 h-3.5 text-amber-700" />
+                          <span>Testar Modo Noite</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleRestoreInitialStores}
+                      className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Restaurar Padrão</span>
+                    </button>
+                  </div>
+                </div>
+
+                {studioTab === 'code' ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+                      <span>
+                        Arquivo único de <b>{config.storeName}</b> com Modo
+                        Dia/Noite · Tailwind CDN + Lucide Icons + JS Vanilla
+                      </span>
+                      <span className="font-mono tabular-nums">
+                        {singleFileHtmlCode.split('\n').length} linhas
+                      </span>
+                    </div>
+                    <div className="relative rounded-2xl bg-neutral-950 border border-stone-300 dark:border-neutral-800 overflow-hidden">
+                      <pre className="p-4 text-xs font-mono text-neutral-200 overflow-x-auto max-h-[680px] leading-relaxed select-all">
+                        <code>{singleFileHtmlCode}</code>
+                      </pre>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Bloco 1: Perfil e Contato */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Nome do Negócio (h1)
+                        </label>
+                        <input
+                          type="text"
+                          value={config.storeName}
+                          onChange={(e) =>
+                            setConfig({ ...config, storeName: e.target.value })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Cidade / UF
+                        </label>
+                        <input
+                          type="text"
+                          value={config.cityState}
+                          onChange={(e) =>
+                            setConfig({ ...config, cityState: e.target.value })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Slogan Curto
+                        </label>
+                        <input
+                          type="text"
+                          value={config.slogan}
+                          onChange={(e) =>
+                            setConfig({ ...config, slogan: e.target.value })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Telefone / WhatsApp
+                        </label>
+                        <input
+                          type="text"
+                          value={config.phoneTel}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const digits = val.replace(/\D/g, '');
+                            setConfig({
+                              ...config,
+                              whatsappNumber: digits || val,
+                              phoneTel: val.startsWith('+')
+                                ? val
+                                : `+${digits}`,
+                              phoneDisplay: val,
+                            });
+                          }}
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white font-mono focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Arroba do Instagram
+                        </label>
+                        <input
+                          type="text"
+                          value={config.instagramHandle}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              instagramHandle: e.target.value,
+                            })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bloco 2: Marquee, Wi-Fi e Oferta Relâmpago */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-stone-200 dark:border-neutral-800">
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Frase Marquee 1
+                        </label>
+                        <input
+                          type="text"
+                          value={config.marqueePhrase1}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              marqueePhrase1: e.target.value,
+                            })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Frase Marquee 2
+                        </label>
+                        <input
+                          type="text"
+                          value={config.marqueePhrase2}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              marqueePhrase2: e.target.value,
+                            })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Nome da Rede Wi-Fi (SSID)
+                        </label>
+                        <input
+                          type="text"
+                          value={config.wifiSsid}
+                          onChange={(e) =>
+                            setConfig({ ...config, wifiSsid: e.target.value })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Senha do Wi-Fi (vazio = aberta)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ex: cliente123 (ou deixe vazio)"
+                          value={config.wifiPassword}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              wifiPassword: e.target.value,
+                              wifiEncryption: e.target.value ? 'WPA' : 'nopass',
+                            })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Título da Oferta Relâmpago
+                        </label>
+                        <input
+                          type="text"
+                          value={config.offerTitle}
+                          onChange={(e) =>
+                            setConfig({ ...config, offerTitle: e.target.value })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Preço / Destaque da Oferta
+                        </label>
+                        <input
+                          type="text"
+                          value={config.offerPriceHighlight}
+                          onChange={(e) =>
+                            setConfig({
+                              ...config,
+                              offerPriceHighlight: e.target.value,
+                            })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                          Endereço Completo
+                        </label>
+                        <input
+                          type="text"
+                          value={config.address}
+                          onChange={(e) =>
+                            setConfig({ ...config, address: e.target.value })
+                          }
+                          className="w-full bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bloco 3: Gerenciar Produtos do Catálogo */}
+                    <div className="pt-4 border-t border-stone-200 dark:border-neutral-800 space-y-4">
+                      <h3 className="text-sm font-bold text-neutral-900 dark:text-white">
+                        Adicionar Produto ao Catálogo ({config.storeName})
+                      </h3>
+                      <form
+                        onSubmit={handleAddProduct}
+                        className="grid grid-cols-1 sm:grid-cols-4 gap-3"
+                      >
+                        <input
+                          type="text"
+                          placeholder="Nome do produto"
+                          value={newProdName}
+                          onChange={(e) => setNewProdName(e.target.value)}
+                          className="sm:col-span-2 bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Preço (vazio = a combinar)"
+                          value={newProdPrice}
+                          onChange={(e) => setNewProdPrice(e.target.value)}
+                          className="bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                        <select
+                          value={newProdCategory}
+                          onChange={(e) => setNewProdCategory(e.target.value)}
+                          className="bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        >
+                          {config.categories
+                            .filter((c) => c.id !== 'todos')
+                            .map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                        </select>
+                        <input
+                          type="text"
+                          placeholder="Descrição curta do item"
+                          value={newProdDesc}
+                          onChange={(e) => setNewProdDesc(e.target.value)}
+                          className="sm:col-span-3 bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-amber-400"
+                        />
+                        <button
+                          type="submit"
+                          className="bg-amber-400 hover:bg-amber-300 text-neutral-950 font-bold text-xs rounded-xl px-4 py-2 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Incluir Item</span>
+                        </button>
+                      </form>
+
+                      <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        {config.products.map((prod) => (
+                          <div
+                            key={prod.id}
+                            className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-stone-50 dark:bg-neutral-950 border border-stone-200 dark:border-neutral-800/80 text-xs"
+                          >
+                            <div className="min-w-0">
+                              <b className="text-neutral-900 dark:text-white block truncate">
+                                {prod.name}
+                              </b>
+                              <span className="text-neutral-500 dark:text-neutral-400 tabular-nums">
+                                {prod.price !== null
+                                  ? `R$ ${prod.price
+                                      .toFixed(2)
+                                      .replace('.', ',')}`
+                                  : 'Preço a combinar'}{' '}
+                                · {prod.category}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveProduct(prod.id)}
+                              aria-label={`Remover ${prod.name}`}
+                              className="p-2 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </aside>
+          )}
         </div>
       </div>
 
@@ -1528,7 +1649,9 @@ export default function App() {
       {cart.length > 0 && (
         <div
           id="cart-bar"
-          className="fixed bottom-4 inset-x-4 max-w-md mx-auto lg:left-8 lg:right-auto lg:w-[416px] bg-emerald-600 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-3 z-40 border border-emerald-400/30"
+          className={`fixed bottom-4 inset-x-4 max-w-md mx-auto ${
+            isCustomerView ? '' : 'lg:left-8 lg:right-auto lg:w-[416px]'
+          } bg-emerald-600 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-3 z-40 border border-emerald-400/30`}
         >
           <div className="min-w-0">
             <b id="cart-count" className="text-sm block tabular-nums">
