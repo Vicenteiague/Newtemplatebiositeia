@@ -325,7 +325,10 @@ ${faqsHtml}
       <b class="text-neutral-800 dark:text-neutral-300 block">${config.storeName}</b>
       <p>${config.address}</p>
       <p>Tel: ${config.phoneDisplay} · ${config.openingHours}</p>
-      <p class="pt-2 text-[11px] text-neutral-500">Desenvolvido por <a href="${config.agencyCreditUrl}" class="text-neutral-700 dark:text-neutral-400 hover:text-amber-600 dark:hover:text-amber-400 underline">${config.agencyCreditName}</a></p>
+      <div class="pt-2 text-[11px] text-neutral-500 space-y-0.5">
+        <p>Feito com ♥️ por <a href="${config.agencyCreditUrl}" target="_blank" rel="noopener noreferrer" class="text-neutral-700 dark:text-neutral-400 hover:text-amber-600 dark:hover:text-amber-400 underline font-medium">${config.agencyCreditName}</a></p>
+        <p><a href="${config.agencyCreditUrl}" target="_blank" rel="noopener noreferrer" class="text-neutral-600 dark:text-neutral-400 hover:text-amber-600 dark:hover:text-amber-400">67993174612</a></p>
+      </div>
     </footer>
   </main>
 

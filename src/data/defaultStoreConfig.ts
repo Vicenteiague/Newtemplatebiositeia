@@ -146,8 +146,8 @@ export const DUDA_MELLO_CONFIG: StoreConfig = {
   paymentMethods: ['Pix', 'Crédito', 'Débito', 'Dinheiro'],
   maxInstallments: 10,
   openingHours: 'Seg a sáb: 8h às 18h · Dom: fechado',
-  agencyCreditName: 'Nour BioSite Studio',
-  agencyCreditUrl: '#codigo-html',
+  agencyCreditName: 'BiositesAi',
+  agencyCreditUrl: 'https://wa.me/5567993174612',
   categories: [
     {
       id: 'todos',
@@ -305,8 +305,8 @@ export const ENERGY_STOR3_CONFIG: StoreConfig = {
   paymentMethods: ['Pix', 'Crédito', 'Débito', 'Dinheiro', 'Transf.'],
   maxInstallments: 12,
   openingHours: 'Seg a sáb: 8h às 18h · Bom Retiro, São Paulo/SP',
-  agencyCreditName: 'Jonathan da Nour Sistemas',
-  agencyCreditUrl: '#codigo-html',
+  agencyCreditName: 'BiositesAi',
+  agencyCreditUrl: 'https://wa.me/5567993174612',
   categories: [
     {
       id: 'todos',

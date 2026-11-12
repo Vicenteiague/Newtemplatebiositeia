@@ -1188,15 +1188,29 @@ export default function App() {
                 <p>
                   Tel: {config.phoneDisplay} · {config.openingHours}
                 </p>
-                <p className="pt-2 text-[11px] text-neutral-500">
-                  Template por{' '}
-                  <a
-                    href={config.agencyCreditUrl}
-                    className="text-neutral-700 dark:text-neutral-300 hover:text-amber-600 dark:hover:text-amber-400 underline"
-                  >
-                    {config.agencyCreditName}
-                  </a>
-                </p>
+                <div className="pt-2 text-[11px] text-neutral-500 space-y-0.5">
+                  <p>
+                    Feito com ♥️ por{' '}
+                    <a
+                      href={config.agencyCreditUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-neutral-700 dark:text-neutral-300 hover:text-amber-600 dark:hover:text-amber-400 underline font-medium"
+                    >
+                      {config.agencyCreditName}
+                    </a>
+                  </p>
+                  <p>
+                    <a
+                      href={config.agencyCreditUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-neutral-600 dark:text-neutral-400 hover:text-amber-600 dark:hover:text-amber-400 tabular-nums"
+                    >
+                      67993174612
+                    </a>
+                  </p>
+                </div>
               </footer>
             </main>
           </div>
